@@ -34,7 +34,7 @@ if user_query:
         st.stop()
 
     try:
-        model = SentenceTransformer("local_model")  # ✅ Use your local model
+        model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
         query_embedding = model.encode([user_query])
     except Exception as e:
         st.error(f"❌ Failed to load or run embedding model: {e}")
