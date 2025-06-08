@@ -1,46 +1,43 @@
-from sentence_transformers import SentenceTransformer
-import json
-import faiss
-import numpy as np
 import os
+import json
+from dotenv import load_dotenv
+from openai import OpenAI
+import numpy as np
+import faiss
 
-# === Load chunked data ===
-chunk_file = "fanlabs_chunks.json"
-if not os.path.exists(chunk_file):
-    raise FileNotFoundError(f"❌ Missing input file: {chunk_file}")
+# Load .env vars
+load_dotenv()
+client = OpenAI()
 
-with open(chunk_file, "r") as f:
+# Load chunks
+with open("cleaned_chunks.json", "r") as f:
     chunks = json.load(f)
 
-# === Load embedding model ===
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+# Filter & clean
+texts = [chunk["content"].strip() for chunk in chunks if chunk.get("content", "").strip()]
 
-# === Generate embeddings and metadata ===
-vectors = []
-metadata = []
+# Embed
+print(f"Embedding {len(texts)} chunks...")
 
-for i, chunk in enumerate(chunks):
-    content = chunk.get("content", "").strip()
-    if not content:
-        continue  # skip empty chunks
+response = client.embeddings.create(
+    model="text-embedding-3-small",
+    input=texts
+)
 
-    vector = model.encode(content)
-    vectors.append(vector)
-    metadata.append({
-        "id": i,
-        "text": content,
-        "source": chunk.get("document_title", "unknown")
-    })
+# Convert to numpy
+vectors = np.array([r.embedding for r in response.data]).astype("float32")
 
-# === Convert to FAISS index ===
-index = faiss.IndexFlatL2(len(vectors[0]))
-index.add(np.array(vectors).astype("float32"))
+if len(vectors) == 0:
+    raise RuntimeError("❌ No vectors created. Check your input data.")
 
-# === Save index and metadata ===
+# Save index
+index = faiss.IndexFlatL2(vectors.shape[1])
+index.add(vectors)
 faiss.write_index(index, "fanlabs_vector_index.faiss")
 
+# Save metadata
+metadata = [{"text": text} for text in texts]
 with open("fanlabs_chunk_metadata.json", "w") as f:
-    json.dump(metadata, f, indent=2)
+    json.dump(metadata, f)
 
-print(f"✅ Embedded {len(vectors)} chunks")
-print("📁 Saved: fanlabs_vector_index.faiss + fanlabs_chunk_metadata.json")
+print("✅ Embedding + FAISS index complete")

@@ -4,6 +4,9 @@ import os
 import faiss
 import json
 import numpy as np
+import asyncio
+import nest_asyncio
+nest_asyncio.apply()
 from utils.faiss_helpers import load_index_and_metadata
 from utils.prompts import build_prompt
 from utils.search import search_index
