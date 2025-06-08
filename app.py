@@ -21,7 +21,7 @@ index, metadata = load_index_and_metadata()
 # App UI
 st.set_page_config(page_title="FanLabs GPT", layout="wide")
 st.title("🤖 FanLabs GPT")
-st.markdown("Ask me anything based on the book *Fans Have More Friends*.")
+st.markdown("Let's talk fandom")
 
 # Input
 query = st.text_input("Your question:")
@@ -41,9 +41,5 @@ if query:
             )
             st.markdown("### Answer")
             st.write(response.choices[0].message.content)
-
-            st.markdown("### Sources")
-            for i, result in enumerate(results):
-                st.markdown(f"**{i+1}.** {result['source']} — {result['text'][:100]}...")
     else:
         st.warning("No relevant context found.")
