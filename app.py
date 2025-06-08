@@ -1,18 +1,19 @@
 import streamlit as st
-import openai
 import os
 import faiss
 import json
 import numpy as np
-import asyncio
 import nest_asyncio
-nest_asyncio.apply()
+from openai import OpenAI
 from utils.faiss_helpers import load_index_and_metadata
 from utils.prompts import build_prompt
 from utils.search import search_index
 
-# ✅ Use environment variable for OpenAI key (not st.secrets)
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+nest_asyncio.apply()
+client = OpenAI()
+
+# Load keys from environment (set in Render)
+# OPENAI_API_KEY must be in your Render environment variables
 
 # Load vector index and metadata
 index, metadata = load_index_and_metadata()
@@ -31,7 +32,7 @@ if query:
     if results:
         prompt = build_prompt(query, results)
         with st.spinner("Generating answer..."):
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant that uses context from a book to answer questions."},
@@ -39,7 +40,7 @@ if query:
                 ]
             )
             st.markdown("### Answer")
-            st.write(response["choices"][0]["message"]["content"])
+            st.write(response.choices[0].message.content)
 
             st.markdown("### Sources")
             for i, result in enumerate(results):
