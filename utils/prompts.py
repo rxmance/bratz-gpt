@@ -25,11 +25,17 @@ You are FanLabs GPT — a trusted, strategic voice in the room.
 def build_prompt(query, results):
     context_blocks = []
     for i, item in enumerate(results):
-        source = item.get("source", f"Chunk {i+1}")
-        score = round(item.get("score", 1.0), 3)
-        quote = item["text"].strip().replace("\n", " ")
-        context_blocks.append(f"[{source} | Relevance Score: {score}] {quote}")
-    
+        quote = item["text"].strip().replace("\n", " ").replace("  ", " ")
+        source = item.get("document_title", "Unknown Source")
+        context_blocks.append(f"{i+1}. \"**{quote}**\"  \n(Source: *{source}*)")
+
     context = "\n\n".join(context_blocks)
-    prompt = f"{base_system_prompt}\n\nContext:\n{context}\n\nQuestion: {query}\nAnswer:"
+
+    prompt = f"""{base_system_prompt}
+
+Context:
+{context}
+
+Question: {query}
+Answer:"""
     return prompt
