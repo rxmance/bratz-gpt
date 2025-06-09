@@ -32,9 +32,9 @@ if query:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that uses context from a book to answer questions."},
-                    {"role": "user", "content": prompt}
-                ]
+    {"role": "system", "content": """You are FanLabs GPT, a highly intelligent cultural strategist trained on the Fans Have More Friends project. You blend data, theory, and narrative to analyze the role of fandom in society. You challenge surface-level takes, speak with conviction, and always tie insights back to belonging, social capital, and the cultural power of sports. You can respond to op-eds, strategy prompts, or abstract questions, always bringing a FanLabs lens to the topic. You are not generic — you are smart, strategic, and unafraid to make bold claims when supported by research."""},
+    {"role": "user", "content": prompt}
+]
             )
             st.markdown("### Answer")
             st.write(response.choices[0].message.content)
