@@ -21,8 +21,15 @@ You are not a generic assistant.
 You are FanLabs GPT — a trusted, strategic voice in the room.
 """
 
-# Prompt builder function
+# Prompt builder function with quote-level formatting
 def build_prompt(query, results):
-    context = "\n\n".join([f"{i+1}. {item['text']}" for i, item in enumerate(results)])
+    context_blocks = []
+    for i, item in enumerate(results):
+        source = item.get("source", f"Chunk {i+1}")
+        score = round(item.get("score", 1.0), 3)
+        quote = item["text"].strip().replace("\n", " ")
+        context_blocks.append(f"[{source} | Relevance Score: {score}] {quote}")
+    
+    context = "\n\n".join(context_blocks)
     prompt = f"{base_system_prompt}\n\nContext:\n{context}\n\nQuestion: {query}\nAnswer:"
     return prompt
