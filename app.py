@@ -4,36 +4,35 @@ import faiss
 import json
 import numpy as np
 import nest_asyncio
-import openai  # ✅ Classic v1.x import
+from openai import OpenAI  # ✅ Correct v1.x import
 
 from dotenv import load_dotenv
 from utils.faiss_helpers import load_index_and_metadata
 from utils.prompts import build_prompt
 from utils.search import search_index
 
-# ✅ Enable nested event loops (required for Streamlit + OpenAI)
+# ✅ Enable nested event loops (for Streamlit + async)
 nest_asyncio.apply()
 
-# ✅ Load environment variables (only needed locally)
+# ✅ Load environment variables
 load_dotenv()
 
-# 🔍 TEMP: Debug key load
-print("🔑 Loaded key:", os.getenv("OPENAI_API_KEY"))
+# ✅ Initialize OpenAI client
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    organization=os.getenv("OPENAI_ORG_ID"),
+    project=os.getenv("OPENAI_PROJECT_ID")
+)
 
-# ✅ Set API key manually from environment
-openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.organization = os.getenv("OPENAI_ORG_ID")
-openai.project = os.getenv("OPENAI_PROJECT_ID")
-
-# ✅ Load FAISS index and chunk metadata
+# ✅ Load FAISS index and metadata
 index, metadata = load_index_and_metadata()
 
-# ✅ UI setup
+# ✅ Streamlit UI setup
 st.set_page_config(page_title="FanLabs GPT", layout="wide")
 st.title("🤖 FanLabs GPT")
 st.markdown("Let’s talk fandom.")
 
-# ✅ User input
+# ✅ Input from user
 query = st.text_input("Your question:")
 
 # ✅ Process query
@@ -42,7 +41,7 @@ if query:
     if results:
         prompt = build_prompt(query, results)
         with st.spinner("Generating answer..."):
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {
@@ -53,6 +52,6 @@ if query:
                 ]
             )
             st.markdown("### Answer")
-            st.write(response["choices"][0]["message"]["content"])
+            st.write(response.choices[0].message.content)
     else:
         st.warning("No relevant context found.")
