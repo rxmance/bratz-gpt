@@ -4,8 +4,7 @@ import os
 import json
 from openai import OpenAI
 
-client = OpenAI()
-
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 EMBED_MODEL = "text-embedding-3-small"
 
 def embed_query(query: str) -> np.ndarray:

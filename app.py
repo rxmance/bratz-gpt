@@ -10,10 +10,7 @@ from utils.prompts import build_prompt
 from utils.search import search_index
 
 nest_asyncio.apply()
-client = OpenAI()
-
-# Load keys from environment (set in Render)
-# OPENAI_API_KEY must be in your Render environment variables
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # Load vector index and metadata
 index, metadata = load_index_and_metadata()
