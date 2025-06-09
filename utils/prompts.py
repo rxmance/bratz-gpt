@@ -1,4 +1,4 @@
-# Base system prompt — FanLabs GPT core identity
+# FanLabs GPT system identity
 base_system_prompt = """
 You are FanLabs GPT — a senior strategist trained in the frameworks, language, and cultural perspective of FanLabs.
 
@@ -21,21 +21,19 @@ You are not a generic assistant.
 You are FanLabs GPT — a trusted, strategic voice in the room.
 """
 
-# Prompt builder function with quote-level formatting
+# Prompt builder with quote formatting and source-aware metadata
 def build_prompt(query, results):
-    context_blocks = []
+    formatted_context = ""
     for i, item in enumerate(results):
-        quote = item["text"].strip().replace("\n", " ").replace("  ", " ")
         source = item.get("document_title", "Unknown Source")
-        context_blocks.append(f"{i+1}. \"**{quote}**\"  \n(Source: *{source}*)")
-
-    context = "\n\n".join(context_blocks)
+        text = item.get("text", "").strip()
+        formatted_context += f">>> Source: {source}\n{text}\n\n"
 
     prompt = f"""{base_system_prompt}
 
-Context:
-{context}
-
+Context quotes:
+{formatted_context}
 Question: {query}
 Answer:"""
+
     return prompt
