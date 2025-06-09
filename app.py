@@ -4,27 +4,28 @@ import faiss
 import json
 import numpy as np
 import nest_asyncio
-from openai import OpenAI  # ✅ Correct v1.x import
 
+from openai import OpenAI
 from dotenv import load_dotenv
+
 from utils.faiss_helpers import load_index_and_metadata
 from utils.prompts import build_prompt
 from utils.search import search_index
 
-# ✅ Enable nested event loops (for Streamlit + async)
+# ✅ Enable nested loops (required for Streamlit + OpenAI)
 nest_asyncio.apply()
 
 # ✅ Load environment variables
 load_dotenv()
 
-# ✅ Initialize OpenAI client
+# ✅ Set up OpenAI client
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
     organization=os.getenv("OPENAI_ORG_ID"),
-    project=os.getenv("OPENAI_PROJECT_ID")
+    project=os.getenv("OPENAI_PROJECT_ID"),
 )
 
-# ✅ Load FAISS index and metadata
+# ✅ Load FAISS index and chunk metadata
 index, metadata = load_index_and_metadata()
 
 # ✅ Streamlit UI setup
@@ -32,7 +33,7 @@ st.set_page_config(page_title="FanLabs GPT", layout="wide")
 st.title("🤖 FanLabs GPT")
 st.markdown("Let’s talk fandom.")
 
-# ✅ Input from user
+# ✅ User input
 query = st.text_input("Your question:")
 
 # ✅ Process query
