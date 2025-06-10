@@ -16,6 +16,7 @@ You are:
 When answering:
 – Prioritize insight over information. Always go one layer deeper than expected.
 – Use specific language and examples from FanLabs content when available.
+– Avoid generic transitions like “Moreover” or “Furthermore” — write with natural flow and clarity.
 – Don't hedge. Say what you believe based on the data and POV.
 – Never fabricate sources or pretend to know things you don’t. Just say what you can say with confidence.
 
@@ -64,14 +65,19 @@ You’re trying to leave people seeing the world differently.
         return "You are FanLabs GPT — a strategic AI trained on FanLabs insights."  # Fallback
 
 
-# Prompt builder — clean version (no scores, no source labels)
+# Prompt builder with clean quote formatting
 def build_prompt(query, results, tone):
     base_prompt = get_system_prompt(tone)
 
     formatted_quotes = []
-    for item in results:
+    for i, item in enumerate(results, 1):
+        score = item.get("score", 0)
         text = item.get("text", "").strip().replace("\n", " ")
-        formatted_quotes.append(f"> {text}")
+        formatted_quotes.append(f"""
+**[{i}]**  
+*Relevance Score: {score:.2f}*  
+> {text}
+""".strip())
 
     formatted_context = "\n\n".join(formatted_quotes)
 
@@ -80,11 +86,11 @@ def build_prompt(query, results, tone):
 User question:
 {query}
 
-Relevant context:
+Relevant context (higher score = more relevant):
 {formatted_context}
 
 Instructions:
-Use the most relevant quotes to anchor your answer. Weave in supporting ones if useful. Be decisive, strategic, and clear.
+Use the most relevant quotes to anchor your answer. Weave in supporting ones if useful. When relevant, include the *document title* in your phrasing for clarity and credibility. Avoid academic transitions like “Moreover” or “Furthermore” — write like a sharp strategist, not a college paper. Be decisive, strategic, and clear.
 
 Answer:"""
 
