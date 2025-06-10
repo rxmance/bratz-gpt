@@ -13,24 +13,32 @@ def combined_score(chunk, alpha=1.0, beta=0.0):
 
 
 # ✅ 2. Your actual search_index function
-def search_index(query, index, metadata, top_k=5):
-    query_embedding = np.array([get_embedding(query)]).astype("float32")
-    scores, indices = index.search(query_embedding, top_k * 4)
+from utils.embedding import get_embedding
+import numpy as np
 
+def search_index(query, index, metadata, top_k=5, diversity_threshold=0.9):
+    query_vector = np.array(get_embedding(query), dtype=np.float32)
+    scores, indices = index.search(np.array([query_vector]), top_k * 2)
+
+    seen_texts = set()
     results = []
-    for i, idx in enumerate(indices[0]):
+
+    for idx, score in zip(indices[0], scores[0]):
         if idx == -1:
             continue
-        score = scores[0][i]
-        entry = metadata[idx]
-        entry["score"] = score
-        results.append(entry)
 
-    # ✅ Sort by combined score (lower = better)
-    top_chunks = sorted(results, key=combined_score)[:top_k]
+        item = metadata[idx]
+        text = item.get("text", "").strip()
 
-    # 🔍 Optional: debug print of top chunk scores
-    for i, chunk in enumerate(top_chunks):
-        print(f"#{i+1}: score={chunk['score']:.4f} | text={chunk['text'][:60]}...")
+        # Skip overly similar quotes (same or near-identical text)
+        if any(text.lower() in seen.lower() or seen.lower() in text.lower() for seen in seen_texts):
+            continue
 
-    return top_chunks
+        seen_texts.add(text)
+        item["score"] = float(score)
+        results.append(item)
+
+        if len(results) >= top_k:
+            break
+
+    return results
