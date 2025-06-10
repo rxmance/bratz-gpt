@@ -4,6 +4,7 @@ import faiss
 import json
 import numpy as np
 import nest_asyncio
+import re
 
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -28,15 +29,25 @@ client = OpenAI(
 # ✅ Load FAISS index and chunk metadata
 index, metadata = load_index_and_metadata()
 
+# ✅ Function to clean Strategist responses
+def strip_source_mentions(text):
+    text = re.sub(r"\(([^)]*(Talk|Deck|Report|Doc)[^)]*)\)", "", text)
+    text = re.sub(r"\[([^]]*(Talk|Deck|Report|Doc)[^]]*)\]", "", text)
+    text = re.sub(r"(Loneliness Talk|Survey Deck|Fan Report|Brand Deck|Ethnography)", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s{2,}", " ", text)
+    text = re.sub(r"\s+\.", ".", text).strip()
+    return text
+
 # ✅ Streamlit UI setup
 st.set_page_config(page_title="FanLabs GPT", layout="wide")
 st.title("🤖 FanLabs GPT")
 st.markdown("Let’s talk fandom.")
+
 # 🔀 Tone selector
 tone = st.selectbox(
     "Choose a voice for FanLabs GPT:",
     ["Strategist", "Provocateur", "Historian"],
-    index=0  # Default is now Strategist
+    index=0  # Default is Strategist
 )
 
 # ✅ User input
@@ -58,7 +69,13 @@ if query:
                     {"role": "user", "content": prompt}
                 ]
             )
+            raw_output = response.choices[0].message.content
+            if tone == "Strategist":
+                final_output = strip_source_mentions(raw_output)
+            else:
+                final_output = raw_output
+
             st.markdown("### Answer")
-            st.write(response.choices[0].message.content)
+            st.write(final_output)
     else:
         st.warning("No relevant context found.")
