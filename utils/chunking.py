@@ -1,24 +1,23 @@
 import re
 
-def chunk_text(text, max_chars=700, min_chars=350):
-    """
-    Splits text into chunks based on sentence boundaries.
-    Attempts to balance chunk length between min_chars and max_chars.
-    """
-    sentences = re.split(r'(?<=[.!?])\s+', text)
-    chunks, current = [], ""
+def chunk_text(text, max_tokens=400):
+    # Simple tokenizer: counts words as a proxy for tokens
+    def tokenize(s):
+        return s.split()
 
-    for sentence in sentences:
-        if len(current) + len(sentence) + 1 <= max_chars:
-            current += sentence + " "
+    paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
+    chunks = []
+    current_chunk = []
+
+    for para in paragraphs:
+        if sum(len(tokenize(p)) for p in current_chunk + [para]) <= max_tokens:
+            current_chunk.append(para)
         else:
-            if len(current.strip()) >= min_chars:
-                chunks.append(current.strip())
-                current = sentence + " "
-            else:
-                current += sentence + " "
+            if current_chunk:
+                chunks.append(" ".join(current_chunk))
+            current_chunk = [para]
 
-    if current.strip():
-        chunks.append(current.strip())
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
 
     return chunks

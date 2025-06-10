@@ -25,7 +25,12 @@ def main():
         text = extract_text(path)
         chunks = chunk_text(text)
         print(f"→ {len(chunks)} chunks")
-        output_data = [{"text": c, "source": name.replace("_", " ").title(), "title": name} for c in chunks]
+        output_data = [{
+            "text": c,
+            "source": name.replace("_", " ").title(),
+            "title": name,
+            "document_title": name.replace("_", " ").title()
+        } for c in chunks]
         with open(f"output/{name}_chunks.json", "w") as f:
             json.dump(output_data, f, indent=2)
 
