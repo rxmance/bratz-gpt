@@ -72,9 +72,13 @@ def build_prompt(query, results, tone):
         score = item.get("score", 0)
         title = item.get("document_title") or item.get("title", "Unknown Source")
         text = item.get("text", "").strip().replace("\n", " ")
-        formatted_quotes.append(f"[{i}] (score: {score:.2f}) \"{text}\" — *{title}*")
+        formatted_quotes.append(f"""
+**[{i}] {title}**  
+*Relevance Score: {score:.2f}*  
+> {text}
+""".strip())
 
-    formatted_context = "\n".join(formatted_quotes)
+    formatted_context = "\n\n".join(formatted_quotes)
 
     prompt = f"""{base_prompt}
 

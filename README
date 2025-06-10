@@ -1,0 +1,91 @@
+# 🧠 FanLabs GPT
+
+**FanLabs GPT** is a custom-built AI chatbot trained on the Fans Have More Friends project. It blends strategy, culture, and data to help teams explore fandom, identity, and belonging through the FanLabs lens.
+
+## 🚀 Features
+
+- Quote-level RAG retrieval with score-weighted context
+- Tone selector (Strategist, Provocateur, Historian)
+- Source-aware response formatting
+- Designed for cultural strategists, brand teams, and researchers
+
+## 🛠️ Local Setup
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/rxmance/fanlabs-gpt-fresh.git
+cd fanlabs-gpt-fresh
+
+2. Create and activate a virtual environment
+bash
+Copy
+Edit
+python3 -m venv venv
+source venv/bin/activate
+
+3. Install dependencies
+bash
+Copy
+Edit
+pip install -r requirements.txt
+
+4. Set up environment variables
+Create a .env file in the root directory with the following:
+
+env
+Copy
+Edit
+OPENAI_API_KEY=your_openai_key
+OPENAI_ORG_ID=your_org_id
+OPENAI_PROJECT_ID=your_project_id
+Or use Streamlit secrets in .streamlit/secrets.toml if deploying to Render.
+
+5. Embed documents (optional if not yet embedded)
+bash
+Copy
+Edit
+python scripts/embed_combined_chunks.py
+
+6. Run the app
+bash
+Copy
+Edit
+streamlit run app.py
+
+📄 Project Structure
+├── app.py                       # Main Streamlit app
+├── utils/
+│   ├── prompts.py              # System + prompt builder logic
+│   ├── search.py               # FAISS search helper
+│   ├── faiss_helpers.py        # Index + metadata loader
+├── scripts/
+│   └── embed_combined_chunks.py # Data embedding script
+├── output/                     # Chunked + embedded documents
+├── dirty data/                 # Original DOCX files
+├── requirements.txt            # Python dependencies
+
+🧠 Voices
+Users can select a voice in the app:
+
+Strategist — direct, grounded, seasoned
+
+Provocateur — sharp, irreverent, creative
+
+Historian — cultural depth, slow burn, wide view
+
+✨ Coming Soon
+Improved source formatting and filtering
+
+Analytics, memory, and feedback logging
+
+Client-specific versions (e.g. Bratz GPT, etc.)
+
+Built with 💡 by FanLabs. For cultural strategists who want to go deeper.
+
+
+
+
+
+
+
