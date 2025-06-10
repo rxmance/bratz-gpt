@@ -1,91 +1,96 @@
-# 🧠 FanLabs GPT
+# FanLabs GPT 🧠⚽️
 
-**FanLabs GPT** is a custom-built AI chatbot trained on the Fans Have More Friends project. It blends strategy, culture, and data to help teams explore fandom, identity, and belonging through the FanLabs lens.
+A custom GPT-powered research and strategy assistant trained on the *Fans Have More Friends* project. Built for cultural strategists, insight teams, and brand thinkers who want sharp, sourced, and culturally fluent answers — fast.
 
-## 🚀 Features
+---
 
-- Quote-level RAG retrieval with score-weighted context
-- Tone selector (Strategist, Provocateur, Historian)
-- Source-aware response formatting
-- Designed for cultural strategists, brand teams, and researchers
+## 🔍 What It Does
 
-## 🛠️ Local Setup
+FanLabs GPT retrieves relevant excerpts from internal documents, then uses OpenAI’s GPT model to craft well-informed responses in a chosen tone of voice. It's like having a senior strategist, cultural critic, or historian in the room — powered by your own IP.
 
-### 1. Clone the repo
+---
 
+## ✨ Features
+
+- **Tone Toggle** – Choose your assistant’s voice:
+  - `Strategist` — Confident, clear, POV-driven  
+  - `Provocateur` — Bold, spicy, sharp  
+  - `Historian` — Sweeping, grounded, zoomed out  
+
+- **Quote-level sourcing** – Pulls and formats the most relevant document excerpts, ranked by semantic score  
+- **Clean prompt logic** – Builds rich, voice-aligned prompts with instructions and context baked in  
+- **FAISS + OpenAI retrieval** – Fast, local semantic search with source-aware metadata  
+
+---
+
+## 🛠 Setup
+
+### 1. Clone the Repo
 ```bash
 git clone https://github.com/rxmance/fanlabs-gpt-fresh.git
 cd fanlabs-gpt-fresh
 
-2. Create and activate a virtual environment
+2. Create Virtual Environment
 bash
-Copy
-Edit
+
 python3 -m venv venv
 source venv/bin/activate
 
-3. Install dependencies
+3. Install Dependencies
 bash
-Copy
-Edit
+
 pip install -r requirements.txt
 
-4. Set up environment variables
-Create a .env file in the root directory with the following:
+4. Add Environment Variables
+Create a .env file and include:
 
 env
-Copy
-Edit
-OPENAI_API_KEY=your_openai_key
-OPENAI_ORG_ID=your_org_id
-OPENAI_PROJECT_ID=your_project_id
-Or use Streamlit secrets in .streamlit/secrets.toml if deploying to Render.
 
-5. Embed documents (optional if not yet embedded)
-bash
-Copy
-Edit
-python scripts/embed_combined_chunks.py
+OPENAI_API_KEY=your-key
+OPENAI_ORG_ID=your-org-id
+OPENAI_PROJECT_ID=your-project-id
 
-6. Run the app
+▶️ Run the App Locally
 bash
-Copy
-Edit
+
 streamlit run app.py
 
-📄 Project Structure
-├── app.py                       # Main Streamlit app
+ 📦 Embed New Documents
+1. Add your .docx files to the dirty data/ folder
+2. Then run:
+
+bash
+
+python scripts/combine_and_clean.py
+python scripts/embed_combined_chunks.py
+
+This will:
+
+-Clean and chunk the data
+-Save the updated fanlabs_vector_index.faiss and fanlabs_chunk_metadata.json
+
+📁 Project Structure
+
+fanlabs-gpt-fresh/
+│
+├── app.py                            # Streamlit frontend + main logic
 ├── utils/
-│   ├── prompts.py              # System + prompt builder logic
-│   ├── search.py               # FAISS search helper
-│   ├── faiss_helpers.py        # Index + metadata loader
+│   ├── prompts.py                    # Tone-specific system prompts + prompt builder
+│   ├── search.py                     # FAISS search wrapper
+│   ├── faiss_helpers.py              # Load/save FAISS index and metadata
+│   └── chunking.py                   # Text chunking logic
+│
 ├── scripts/
-│   └── embed_combined_chunks.py # Data embedding script
-├── output/                     # Chunked + embedded documents
-├── dirty data/                 # Original DOCX files
-├── requirements.txt            # Python dependencies
+│   ├── combine_and_clean.py         # Cleans + chunks documents
+│   └── embed_combined_chunks.py     # Embeds chunks into FAISS index
+│
+├── dirty data/                       # Raw .docx files
+├── output/                           # Cleaned and chunked .json output
+├── fanlabs_vector_index.faiss       # Vector store
+├── fanlabs_chunk_metadata.json      # Chunk metadata
+└── README.md
 
-🧠 Voices
-Users can select a voice in the app:
-
-Strategist — direct, grounded, seasoned
-
-Provocateur — sharp, irreverent, creative
-
-Historian — cultural depth, slow burn, wide view
-
-✨ Coming Soon
-Improved source formatting and filtering
-
-Analytics, memory, and feedback logging
-
-Client-specific versions (e.g. Bratz GPT, etc.)
-
-Built with 💡 by FanLabs. For cultural strategists who want to go deeper.
-
-
-
-
-
-
-
+🤝 Credits
+Created by Chris Dennler
+Strategy, code, writing, testing — all in-house.
+Trained on the full Fans Have More Friends library.
