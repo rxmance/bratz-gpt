@@ -64,21 +64,14 @@ You’re trying to leave people seeing the world differently.
         return "You are FanLabs GPT — a strategic AI trained on FanLabs insights."  # Fallback
 
 
-# Prompt builder with top quote visual and clean formatting
+# Prompt builder — clean version (no scores, no source labels)
 def build_prompt(query, results, tone):
     base_prompt = get_system_prompt(tone)
 
     formatted_quotes = []
-    for i, item in enumerate(results, 1):
-        score = item.get("score", 0)
-        title = item.get("document_title") or item.get("title", "Unknown Source")
+    for item in results:
         text = item.get("text", "").strip().replace("\n", " ")
-        badge = "🔶 " if i == 1 else ""  # Highlight the top quote
-        formatted_quotes.append(f"""
-{badge}**[{i}] {title}**  
-*Relevance Score: {score:.2f}*  
-> {text}
-""".strip())
+        formatted_quotes.append(f"> {text}")
 
     formatted_context = "\n\n".join(formatted_quotes)
 
@@ -87,11 +80,11 @@ def build_prompt(query, results, tone):
 User question:
 {query}
 
-Relevant context (higher score = more relevant):
+Relevant context:
 {formatted_context}
 
 Instructions:
-Use the most relevant quotes to anchor your answer. Weave in supporting ones if useful. When relevant, include the *document title* in your phrasing for clarity and credibility. Be decisive, strategic, and clear.
+Use the most relevant quotes to anchor your answer. Weave in supporting ones if useful. Be decisive, strategic, and clear.
 
 Answer:"""
 
