@@ -64,7 +64,7 @@ You’re trying to leave people seeing the world differently.
         return "You are FanLabs GPT — a strategic AI trained on FanLabs insights."  # Fallback
 
 
-# Prompt builder with clean quote formatting
+# Prompt builder with top quote visual and clean formatting
 def build_prompt(query, results, tone):
     base_prompt = get_system_prompt(tone)
 
@@ -73,8 +73,9 @@ def build_prompt(query, results, tone):
         score = item.get("score", 0)
         title = item.get("document_title") or item.get("title", "Unknown Source")
         text = item.get("text", "").strip().replace("\n", " ")
+        badge = "🔶 " if i == 1 else ""  # Highlight the top quote
         formatted_quotes.append(f"""
-**[{i}] {title}**  
+{badge}**[{i}] {title}**  
 *Relevance Score: {score:.2f}*  
 > {text}
 """.strip())
