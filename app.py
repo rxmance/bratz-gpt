@@ -35,8 +35,8 @@ st.markdown("Let’s talk fandom.")
 # 🔀 Tone selector
 tone = st.selectbox(
     "Choose a voice for FanLabs GPT:",
-    ["Strategist", "Analyst", "Provocateur", "Historian"],
-    index=0
+    ["Strategist", "Provocateur", "Historian"],
+    index=0  # Default is now Strategist
 )
 
 # ✅ User input
