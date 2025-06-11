@@ -1,11 +1,10 @@
-### app.py
-
 import streamlit as st
 import os
 import faiss
 import json
 import numpy as np
 import nest_asyncio
+import re
 
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -30,50 +29,49 @@ client = OpenAI(
 # ✅ Load FAISS index and chunk metadata
 index, metadata = load_index_and_metadata()
 
+# ✅ Function to clean responses (if needed for certain tones)
+def strip_source_mentions(text):
+    text = re.sub(r"\(([^)]*(Talk|Deck|Report|Doc)[^)]*)\)", "", text)
+    text = re.sub(r"\[([^]]*(Talk|Deck|Report|Doc)[^]]*)\]", "", text)
+    text = re.sub(r"(Loneliness Talk|Survey Deck|Fan Report|Brand Deck|Ethnography)", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s{2,}", " ", text)
+    text = re.sub(r"\s+\.", ".", text).strip()
+    return text
+
 # ✅ Streamlit UI setup
-st.set_page_config(page_title="💅 Bratz GPT", layout="wide")
-st.title("💅 Bratz GPT")
-st.markdown("Let’s bring the Bratz voice to life.")
+st.set_page_config(page_title="Bratz GPT", layout="wide")
+st.title("💋 Bratz GPT")
+st.markdown("What’s the vibe? Let’s get into it.")
 
-# 🔀 Brand Voice Selector
-brand_voice = st.selectbox(
-    "Choose a Bratz brand voice:",
-    ["Bratz Brand – High-level creative director assistant"]
-)
-
-# 🎭 Bratz Character Tone Selector
-character_voice = st.selectbox(
-    "Choose a Bratz creative perspective:",
-    [
-        "Cloe – Dreamy, empathetic, creative",
-        "Jade – Edgy, fashion-forward, experimental",
-        "Sasha – Strong, driven, musical",
-        "Yasmin – Thoughtful, spiritual, poetic",
-        "Raya – Bold, funny, grounded"
-    ]
+# 🔀 Voice selector
+tone = st.selectbox(
+    "Choose a voice:",
+    ["Bratz Brand", "Cloe", "Jade", "Sasha", "Yasmin", "Raya"],
+    index=0
 )
 
 # ✅ User input
-query = st.text_input("What do you want Bratz GPT to help with?")
+query = st.text_input("Your question:")
 
 # ✅ Process query
 if query:
     results = search_index(query, index, metadata, top_k=5)
     if results:
-        prompt = build_prompt(query, results, brand_voice, character_voice)
-        with st.spinner("Thinking like a Bratz girl..."):
+        prompt = build_prompt(query, results, tone)
+        with st.spinner("Thinking like a Bratz queen..."):
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {
                         "role": "system",
-                        "content": get_system_prompt(brand_voice, character_voice)
+                        "content": get_system_prompt(tone)
                     },
                     {"role": "user", "content": prompt}
                 ]
             )
-            output = response.choices[0].message.content
+            raw_output = response.choices[0].message.content
+            final_output = raw_output  # Optional: add cleaning by tone
             st.markdown("### Answer")
-            st.write(output)
+            st.write(final_output)
     else:
-        st.warning("No relevant content found to support this prompt.")
+        st.warning("No relevant context found.")
