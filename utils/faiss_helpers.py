@@ -3,8 +3,8 @@ import json
 import numpy as np
 
 def load_index_and_metadata(
-    index_path="fanlabs_data/index/fanlabs_vector_index.faiss",
-    metadata_path="fanlabs_data/index/fanlabs_chunk_metadata.json"
+    index_path="bratz_data/index/bratz_vector_index.faiss",
+    metadata_path="bratz_data/index/bratz_chunk_metadata.json"
 ):
     try:
         index = faiss.read_index(index_path)

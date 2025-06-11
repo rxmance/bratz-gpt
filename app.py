@@ -29,25 +29,20 @@ client = OpenAI(
 # ✅ Load FAISS index and chunk metadata
 index, metadata = load_index_and_metadata()
 
-# ✅ Function to clean responses (if needed for certain tones)
-def strip_source_mentions(text):
-    text = re.sub(r"\(([^)]*(Talk|Deck|Report|Doc)[^)]*)\)", "", text)
-    text = re.sub(r"\[([^]]*(Talk|Deck|Report|Doc)[^]]*)\]", "", text)
-    text = re.sub(r"(Loneliness Talk|Survey Deck|Fan Report|Brand Deck|Ethnography)", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s{2,}", " ", text)
-    text = re.sub(r"\s+\.", ".", text).strip()
-    return text
-
 # ✅ Streamlit UI setup
 st.set_page_config(page_title="Bratz GPT", layout="wide")
 st.title("💋 Bratz GPT")
 st.markdown("What’s the vibe? Let’s get into it.")
 
-# 🔀 Voice selector
-tone = st.selectbox(
-    "Choose a voice:",
-    ["Bratz Brand", "Cloe", "Jade", "Sasha", "Yasmin", "Raya"],
-    index=0
+# 🔀 Brand + Character voice selectors
+brand_voice = st.selectbox(
+    "Choose a Bratz brand voice:",
+    ["Bratz Brand"]
+)
+
+character_voice = st.selectbox(
+    "Choose a Bratz creative perspective:",
+    ["Cloe", "Jade", "Sasha", "Yasmin", "Raya"]
 )
 
 # ✅ User input
@@ -57,20 +52,20 @@ query = st.text_input("Your question:")
 if query:
     results = search_index(query, index, metadata, top_k=5)
     if results:
-        prompt = build_prompt(query, results, tone)
+        prompt = build_prompt(query, results, brand_voice, character_voice)
         with st.spinner("Thinking like a Bratz queen..."):
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {
                         "role": "system",
-                        "content": get_system_prompt(tone)
+                        "content": get_system_prompt(brand_voice, character_voice)
                     },
                     {"role": "user", "content": prompt}
                 ]
             )
             raw_output = response.choices[0].message.content
-            final_output = raw_output  # Optional: add cleaning by tone
+            final_output = raw_output
             st.markdown("### Answer")
             st.write(final_output)
     else:

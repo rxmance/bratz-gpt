@@ -1,48 +1,66 @@
+# embed.py — for Bratz GPT
+
 import os
 import json
-from dotenv import load_dotenv
-from openai import OpenAI
+import argparse
 import numpy as np
+from sentence_transformers import SentenceTransformer
 import faiss
 
-# Load environment variables
-load_dotenv()
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    project=os.getenv("OPENAI_PROJECT_ID"),
-    organization=os.getenv("OPENAI_ORG_ID"),
-)
+# ✅ Config
+EMBED_MODEL = "all-MiniLM-L6-v2"
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 100
+INDEX_DIR = "bratz_data/index"
+DATA_DIR = "bratz_data/data"
 
-# Load cleaned chunks
-with open("fanlabs_data/index/fanlabs_chunks.json", "r", encoding="utf-8") as f:
-    chunks = json.load(f)
+# ✅ Create paths if they don't exist
+os.makedirs(INDEX_DIR, exist_ok=True)
 
-# Filter and clean text chunks
-texts = [chunk["content"].strip() for chunk in chunks if chunk.get("content", "").strip()]
-if not texts:
-    raise ValueError("❌ No valid chunks found to embed.")
+# ✅ Load model
+model = SentenceTransformer(EMBED_MODEL)
 
-# Create embeddings
-print(f"🔍 Embedding {len(texts)} chunks using text-embedding-3-small...")
-response = client.embeddings.create(
-    model="text-embedding-3-small",
-    input=texts
-)
+# ✅ Chunking helper
+def chunk_text(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
+    words = text.split()
+    chunks = []
+    for i in range(0, len(words), chunk_size - overlap):
+        chunk = " ".join(words[i:i + chunk_size])
+        if chunk:
+            chunks.append(chunk.strip())
+    return chunks
 
-# Convert to FAISS-compatible format
-vectors = np.array([r.embedding for r in response.data]).astype("float32")
-if vectors.shape[0] == 0:
-    raise RuntimeError("❌ No vectors returned from OpenAI.")
+# ✅ Embed text chunks and store with metadata
+all_chunks = []
+metadata = []
+doc_id = 0
 
-# Build FAISS index
-index = faiss.IndexFlatL2(vectors.shape[1])
-index.add(vectors)
-os.makedirs("fanlabs_data/index", exist_ok=True)
-faiss.write_index(index, "fanlabs_data/index/fanlabs_vector_index.faiss")
+for filename in os.listdir(DATA_DIR):
+    if filename.endswith(".txt"):
+        with open(os.path.join(DATA_DIR, filename), "r", encoding="utf-8") as f:
+            raw_text = f.read()
 
-# Save metadata
-metadata = [{"text": text} for text in texts]
-with open("fanlabs_data/index/fanlabs_chunk_metadata.json", "w", encoding="utf-8") as f:
+        chunks = chunk_text(raw_text)
+        for chunk in chunks:
+            all_chunks.append(chunk)
+            metadata.append({
+                "doc_id": doc_id,
+                "source": filename,
+                "text": chunk
+            })
+
+        doc_id += 1
+
+# ✅ Create FAISS index
+embeddings = model.encode(all_chunks)
+dimension = embeddings.shape[1]
+index = faiss.IndexFlatL2(dimension)
+index.add(np.array(embeddings))
+
+# ✅ Save index and metadata
+faiss.write_index(index, os.path.join(INDEX_DIR, "bratz_vector_index.faiss"))
+
+with open(os.path.join(INDEX_DIR, "bratz_chunk_metadata.json"), "w", encoding="utf-8") as f:
     json.dump(metadata, f, ensure_ascii=False, indent=2)
 
-print("✅ Embedding + FAISS index created and saved to fanlabs_data/index/")
+print(f"✅ Indexed {len(all_chunks)} chunks from {doc_id} documents.")
