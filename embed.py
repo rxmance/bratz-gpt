@@ -2,7 +2,6 @@
 
 import os
 import json
-import argparse
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import faiss
@@ -51,7 +50,11 @@ for filename in os.listdir(DATA_DIR):
 
         doc_id += 1
 
+if not all_chunks:
+    raise ValueError("❌ No valid text chunks found for embedding.")
+
 # ✅ Create FAISS index
+print(f"🔍 Embedding {len(all_chunks)} chunks using {EMBED_MODEL}...")
 embeddings = model.encode(all_chunks)
 dimension = embeddings.shape[1]
 index = faiss.IndexFlatL2(dimension)
