@@ -54,7 +54,7 @@ def filter_by_character(results, character):
 # ✅ Optional: Voice formatting on final response
 def apply_voice_formatting(text, character):
     if character == "Cloe":
-        return text.replace(".", "✨.").replace("!", "!!! 💖").upper()
+        return text.replace(".", "✨.").replace("!", "!!! 💖")
     elif character == "Sasha":
         return text + " 💅"
     elif character == "Yasmin":
@@ -73,7 +73,6 @@ if query:
         if mode == "Talk to a Bratz Character":
             filtered_results = filter_by_character(results, selected_voice)
             if not filtered_results:
-                st.info("No in-character context found — answering from pure Bratz vibe.")
                 prompt = f"User question: {query}\n\nAnswer like {selected_voice} from Bratz."
             else:
                 prompt = build_prompt(query, filtered_results, "Bratz Brand", selected_voice)
