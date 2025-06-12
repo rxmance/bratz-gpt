@@ -1,72 +1,98 @@
-# embed.py — Bratz GPT (OpenAI Version to match FanLabs)
+# 💋 Bratz GPT — Custom Chatbot README
 
-import os
-import json
-from dotenv import load_dotenv
-from openai import OpenAI
-import numpy as np
-import faiss
+Welcome to **Bratz GPT**, your custom-trained chatbot that speaks in the Bratz brand voice and responds in character as Yasmin, Cloe, Jade, Sasha, or Raya. This README walks through everything you need to run, update, and manage your Bratz GPT.
 
-# ✅ Load environment variables
-load_dotenv()
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    project=os.getenv("OPENAI_PROJECT_ID"),
-    organization=os.getenv("OPENAI_ORG_ID"),
-)
+---
 
-# ✅ Config
-DATA_DIR = "bratz_data/data"
-INDEX_DIR = "bratz_data/index"
-os.makedirs(INDEX_DIR, exist_ok=True)
+## 🚀 Quick Start
 
-# ✅ Load and clean text files
-all_chunks = []
-for filename in os.listdir(DATA_DIR):
-    if filename.endswith(".txt"):
-        with open(os.path.join(DATA_DIR, filename), "r", encoding="utf-8") as f:
-            raw = f.read().strip()
-            if raw:
-                all_chunks.append({"source": filename, "text": raw})
+### 1. Activate Your Virtual Environment
+```bash
+cd bratz-gpt
+source venv/bin/activate
+```
 
-# ✅ Split into chunks (simple greedy split)
-def chunk_text(text, chunk_size=500, overlap=100):
-    words = text.split()
-    chunks = []
-    for i in range(0, len(words), chunk_size - overlap):
-        chunk = " ".join(words[i:i + chunk_size])
-        if chunk:
-            chunks.append(chunk.strip())
-    return chunks
+### 2. Embed New Documents (When You Add Data)
+Save your `.txt` files into:
+```
+bratz_data/data/
+```
 
-chunked_data = []
-for doc in all_chunks:
-    chunks = chunk_text(doc["text"])
-    for chunk in chunks:
-        chunked_data.append({"text": chunk, "source": doc["source"]})
+Then run:
+```bash
+python embed.py
+```
+> ✅ This creates your updated FAISS vector index and metadata.
 
-texts = [chunk["text"] for chunk in chunked_data]
-if not texts:
-    raise ValueError("❌ No valid text chunks found to embed.")
+---
 
-# ✅ Embed with OpenAI
-print(f"🔍 Embedding {len(texts)} chunks using text-embedding-3-small...")
-response = client.embeddings.create(
-    model="text-embedding-3-small",
-    input=texts
-)
+## 🧠 GPT Logic
 
-# ✅ Build FAISS index
-vectors = np.array([r.embedding for r in response.data]).astype("float32")
-if vectors.shape[0] == 0:
-    raise RuntimeError("❌ No vectors returned from OpenAI.")
+- **Embedding model:** `text-embedding-3-small` (via OpenAI)
+- **Retrieval:** FAISS
+- **System Prompt:** Defined per voice in `utils/prompts.py`
+- **Query Processing:** Top 5 relevant chunks
+- **Brand & Character voices:** Selected via dropdown in Streamlit UI
 
-index = faiss.IndexFlatL2(vectors.shape[1])
-index.add(vectors)
-faiss.write_index(index, os.path.join(INDEX_DIR, "bratz_vector_index.faiss"))
+---
 
-# ✅ Save metadata
-with open(os.path.join(INDEX_DIR, "bratz_chunk_metadata.json"), "w", encoding="utf-8") as f:
-    json.dump(chunked_data, f, ensure_ascii=False, indent=2)
+## 🗂️ Folder Structure
+```
+bratz-gpt/
+├── app.py                      # Main Streamlit app
+├── embed.py                   # Embeds data and builds index
+├── requirements.txt           # Dependencies
+├── bratz_data/
+│   ├── data/                  # Upload clean .txt files here
+│   └── index/                 # Auto-generated FAISS index & metadata
+├── utils/
+│   ├── prompts.py             # Core system prompts per voice
+│   ├── search.py              # FAISS retrieval logic
+│   └── faiss_helpers.py       # Loads index & metadata
+└── .env                       # API keys (OpenAI, etc.)
+```
 
-print(f"✅ Indexed {len(texts)} chunks from {len(all_chunks)} documents.")
+---
+
+## 🌐 Deployment (Render)
+
+### Push Changes to GitHub
+```bash
+git add .
+git commit -m "Update Bratz GPT prompts and docs"
+git push origin main
+```
+
+### Reboot on Render
+1. Go to [https://dashboard.render.com](https://dashboard.render.com)
+2. Navigate to `bratz-gpt`
+3. Click **Manual Deploy > Clear Cache & Deploy**
+
+> 🔐 Make sure your Render Secrets are set (OpenAI key, org ID, project ID).
+
+---
+
+## 🗣️ Customizing Voices
+You can edit system prompts and tone for each Bratz voice here:
+```
+utils/prompts.py
+```
+Each character has their own section. Keep the tone punchy, confident, and on-brand.
+
+---
+
+## ✅ To-Do / Nice-to-Have
+- [ ] Add logging or basic analytics
+- [ ] Add quote-level scoring display in UI
+- [ ] Add multi-GPT routing (FanLabs + Bratz)
+
+---
+
+## 💬 Test Prompt Example
+> **Prompt:** "What makes Bratz different from other fashion brands today?"
+> 
+> **Voice:** Jade
+
+---
+
+Let’s keep it bold. Let’s keep it Bratz 💅

@@ -1,96 +1,98 @@
-# FanLabs GPT 🧠⚽️
+# 💋 Bratz GPT — Custom Chatbot README
 
-A custom GPT-powered research and strategy assistant trained on the *Fans Have More Friends* project. Built for cultural strategists, insight teams, and brand thinkers who want sharp, sourced, and culturally fluent answers — fast.
-
----
-
-## 🔍 What It Does
-
-FanLabs GPT retrieves relevant excerpts from internal documents, then uses OpenAI’s GPT model to craft well-informed responses in a chosen tone of voice. It's like having a senior strategist, cultural critic, or historian in the room — powered by your own IP.
+Welcome to **Bratz GPT**, your custom-trained chatbot that speaks in the Bratz brand voice and responds in character as Yasmin, Cloe, Jade, Sasha, or Raya. This README walks through everything you need to run, update, and manage your Bratz GPT.
 
 ---
 
-## ✨ Features
+## 🚀 Quick Start
 
-- **Tone Toggle** – Choose your assistant’s voice:
-  - `Strategist` — Confident, clear, POV-driven  
-  - `Provocateur` — Bold, spicy, sharp  
-  - `Historian` — Sweeping, grounded, zoomed out  
-
-- **Quote-level sourcing** – Pulls and formats the most relevant document excerpts, ranked by semantic score  
-- **Clean prompt logic** – Builds rich, voice-aligned prompts with instructions and context baked in  
-- **FAISS + OpenAI retrieval** – Fast, local semantic search with source-aware metadata  
-
----
-
-## 🛠 Setup
-
-### 1. Clone the Repo
+### 1. Activate Your Virtual Environment
 ```bash
-git clone https://github.com/rxmance/fanlabs-gpt-fresh.git
-cd fanlabs-gpt-fresh
-
-2. Create Virtual Environment
-bash
-
-python3 -m venv venv
+cd bratz-gpt
 source venv/bin/activate
+```
 
-3. Install Dependencies
-bash
+### 2. Embed New Documents (When You Add Data)
+Save your `.txt` files into:
+```
+bratz_data/data/
+```
 
-pip install -r requirements.txt
+Then run:
+```bash
+python embed.py
+```
+> ✅ This creates your updated FAISS vector index and metadata.
 
-4. Add Environment Variables
-Create a .env file and include:
+---
 
-env
+## 🧠 GPT Logic
 
-OPENAI_API_KEY=your-key
-OPENAI_ORG_ID=your-org-id
-OPENAI_PROJECT_ID=your-project-id
+- **Embedding model:** `text-embedding-3-small` (via OpenAI)
+- **Retrieval:** FAISS
+- **System Prompt:** Defined per voice in `utils/prompts.py`
+- **Query Processing:** Top 5 relevant chunks
+- **Brand & Character voices:** Selected via dropdown in Streamlit UI
 
-▶️ Run the App Locally
-bash
+---
 
-streamlit run app.py
-
- 📦 Embed New Documents
-1. Add your .docx files to the dirty data/ folder
-2. Then run:
-
-bash
-
-python scripts/combine_and_clean.py
-python scripts/embed_combined_chunks.py
-
-This will:
-
--Clean and chunk the data
--Save the updated fanlabs_vector_index.faiss and fanlabs_chunk_metadata.json
-
-📁 Project Structure
-
-fanlabs-gpt-fresh/
-│
-├── app.py                            # Streamlit frontend + main logic
+## 🗂️ Folder Structure
+```
+bratz-gpt/
+├── app.py                      # Main Streamlit app
+├── embed.py                   # Embeds data and builds index
+├── requirements.txt           # Dependencies
+├── bratz_data/
+│   ├── data/                  # Upload clean .txt files here
+│   └── index/                 # Auto-generated FAISS index & metadata
 ├── utils/
-│   ├── prompts.py                    # Tone-specific system prompts + prompt builder
-│   ├── search.py                     # FAISS search wrapper
-│   ├── faiss_helpers.py              # Load/save FAISS index and metadata
-│   └── chunking.py                   # Text chunking logic
-│
-├── scripts/
-│   ├── combine_and_clean.py         # Cleans + chunks documents
-│   └── embed_combined_chunks.py     # Embeds chunks into FAISS index
-│
-├── dirty data/                       # Raw .docx files
-├── output/                           # Cleaned and chunked .json output
-├── fanlabs_vector_index.faiss       # Vector store
-├── fanlabs_chunk_metadata.json      # Chunk metadata
-└── README.md
+│   ├── prompts.py             # Core system prompts per voice
+│   ├── search.py              # FAISS retrieval logic
+│   └── faiss_helpers.py       # Loads index & metadata
+└── .env                       # API keys (OpenAI, etc.)
+```
 
-🤝 Credits
-Created by Chris Dennler
-Strategy, code, writing, testing — all in-house.
-Trained on the full Fans Have More Friends library.
+---
+
+## 🌐 Deployment (Render)
+
+### Push Changes to GitHub
+```bash
+git add .
+git commit -m "Update Bratz GPT prompts and docs"
+git push origin main
+```
+
+### Reboot on Render
+1. Go to [https://dashboard.render.com](https://dashboard.render.com)
+2. Navigate to `bratz-gpt`
+3. Click **Manual Deploy > Clear Cache & Deploy**
+
+> 🔐 Make sure your Render Secrets are set (OpenAI key, org ID, project ID).
+
+---
+
+## 🗣️ Customizing Voices
+You can edit system prompts and tone for each Bratz voice here:
+```
+utils/prompts.py
+```
+Each character has their own section. Keep the tone punchy, confident, and on-brand.
+
+---
+
+## ✅ To-Do / Nice-to-Have
+- [ ] Add logging or basic analytics
+- [ ] Add quote-level scoring display in UI
+- [ ] Add multi-GPT routing (FanLabs + Bratz)
+
+---
+
+## 💬 Test Prompt Example
+> **Prompt:** "What makes Bratz different from other fashion brands today?"
+> 
+> **Voice:** Jade
+
+---
+
+Let’s keep it bold. Let’s keep it Bratz 💅
