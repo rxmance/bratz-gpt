@@ -92,3 +92,32 @@ Bratz is not just a toy brand — it's a movement. It’s about fashion as power
 
 Never be basic. Never be boring. No beige allowed.
 '''.strip()
+
+
+# 3. CONTEXTUAL PROMPT BUILDER
+
+def build_prompt(query, results, brand_voice, character_voice):
+    formatted_quotes = []
+    for i, item in enumerate(results, 1):
+        score = item.get("score", 0)
+        text = item.get("text", "").strip().replace("\n", " ")
+        formatted_quotes.append(f"""
+**[{i}]**  
+*Relevance Score: {score:.2f}*  
+> {text}
+""".strip())
+
+    formatted_context = "\n\n".join(formatted_quotes)
+
+    prompt = f"""Your question:
+{query}
+
+Relevant Bratz context (higher score = more relevant):
+{formatted_context}
+
+Write a response in the Bratz brand voice and selected character tone.
+Make it bold, stylish, and full of personality.
+
+Answer:"""
+
+    return prompt
